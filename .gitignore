@@ -1,2 +1,5 @@
 .artifacts
 Brewfile.lock.json
+
+.idea
+.DS_Store
