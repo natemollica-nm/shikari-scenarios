@@ -1,0 +1,301 @@
+{
+  "Stop": false,
+  "Region": "global",
+  "Namespace": "default",
+  "ID": "cos-440aa49be229ce249df5722af03d9aa8d5808229",
+  "ParentID": "",
+  "Name": "cos-440aa49be229ce249df5722af03d9aa8d5808229",
+  "Type": "service",
+  "Priority": 50,
+  "AllAtOnce": false,
+  "Datacenters": [
+    "pdx60"
+  ],
+  "NodePool": "default",
+  "Constraints": null,
+  "Affinities": null,
+  "Spreads": null,
+  "TaskGroups": [
+    {
+      "Name": "cos-440aa49be229ce249df5722af03d9aa8d5808229",
+      "Count": 3,
+      "Update": {
+        "Stagger": 30000000000,
+        "MaxParallel": 1,
+        "HealthCheck": "checks",
+        "MinHealthyTime": 10000000000,
+        "HealthyDeadline": 300000000000,
+        "ProgressDeadline": 600000000000,
+        "AutoRevert": false,
+        "AutoPromote": false,
+        "Canary": 0
+      },
+      "Migrate": {
+        "MaxParallel": 1,
+        "HealthCheck": "checks",
+        "MinHealthyTime": 10000000000,
+        "HealthyDeadline": 300000000000
+      },
+      "Constraints": [
+        {
+          "LTarget": "",
+          "RTarget": "true",
+          "Operand": "distinct_hosts"
+        },
+        {
+          "LTarget": "${node.class}",
+          "RTarget": "green",
+          "Operand": "="
+        }
+      ],
+      "Scaling": null,
+      "RestartPolicy": {
+        "Attempts": 2,
+        "Interval": 1800000000000,
+        "Delay": 15000000000,
+        "Mode": "fail",
+        "RenderTemplates": false
+      },
+      "Disconnect": null,
+      "Tasks": [
+        {
+          "Name": "cos-440aa49be229ce249df5722af03d9aa8d5808229",
+          "Driver": "docker",
+          "User": "",
+          "Config": {
+            "image": "gcr.io/clover-dev-container-registry/cos:440aa49be229ce249df5722af03d9aa8d5808229",
+            "ports": [
+              "http",
+              "stats"
+            ],
+            "volume_driver": "local",
+            "volumes": [
+              "cos_java_piddir:/tmp/hsperfdata_payweb"
+            ]
+          },
+          "Env": null,
+          "Services": [
+            {
+              "Name": "cos-440aa49be229ce249df5722af03d9aa8d5808229-http-service",
+              "TaskName": "cos-440aa49be229ce249df5722af03d9aa8d5808229",
+              "PortLabel": "http",
+              "AddressMode": "auto",
+              "Address": "",
+              "EnableTagOverride": false,
+              "Tags": null,
+              "CanaryTags": null,
+              "Checks": [
+                {
+                  "Name": "cos-440aa49be229ce249df5722af03d9aa8d5808229-http-service-healthCheck",
+                  "Type": "http",
+                  "Command": "",
+                  "Args": null,
+                  "Path": "/adm/_status",
+                  "Protocol": "",
+                  "PortLabel": "stats",
+                  "Expose": false,
+                  "AddressMode": "",
+                  "Interval": 2000000000,
+                  "Timeout": 2000000000,
+                  "InitialStatus": "",
+                  "Notes": "",
+                  "TLSServerName": "",
+                  "TLSSkipVerify": false,
+                  "Method": "",
+                  "Header": null,
+                  "CheckRestart": null,
+                  "GRPCService": "",
+                  "GRPCUseTLS": false,
+                  "TaskName": "cos-440aa49be229ce249df5722af03d9aa8d5808229",
+                  "SuccessBeforePassing": 0,
+                  "FailuresBeforeCritical": 0,
+                  "FailuresBeforeWarning": 0,
+                  "Body": "",
+                  "OnUpdate": "require_healthy"
+                }
+              ],
+              "Connect": null,
+              "Meta": null,
+              "CanaryMeta": null,
+              "TaggedAddresses": null,
+              "Namespace": "default",
+              "OnUpdate": "require_healthy",
+              "Provider": "consul",
+              "Cluster": "default",
+              "Identity": null
+            }
+          ],
+          "Vault": null,
+          "Consul": null,
+          "Templates": [
+            {
+              "SourcePath": "",
+              "DestPath": "secrets/secrets.env",
+              "EmbeddedTmpl": "COS_STARTUP_PASSWORD=<Password>",
+              "ChangeMode": "restart",
+              "ChangeSignal": "",
+              "ChangeScript": null,
+              "Splay": 5000000000,
+              "Perms": "0644",
+              "Uid": null,
+              "Gid": null,
+              "LeftDelim": "{{",
+              "RightDelim": "}}",
+              "Envvars": true,
+              "VaultGrace": 0,
+              "Wait": null,
+              "ErrMissingKey": false
+            }
+          ],
+          "Constraints": [
+            {
+              "LTarget": "${attr.consul.version}",
+              "RTarget": ">= 1.8.0",
+              "Operand": "semver"
+            }
+          ],
+          "Affinities": null,
+          "Resources": {
+            "CPU": 5000,
+            "Cores": 0,
+            "MemoryMB": 5000,
+            "MemoryMaxMB": 0,
+            "DiskMB": 0,
+            "IOPS": 0,
+            "Networks": null,
+            "Devices": null,
+            "NUMA": null
+          },
+          "RestartPolicy": {
+            "Attempts": 2,
+            "Interval": 1800000000000,
+            "Delay": 15000000000,
+            "Mode": "fail",
+            "RenderTemplates": false
+          },
+          "DispatchPayload": null,
+          "Lifecycle": null,
+          "Meta": null,
+          "KillTimeout": 5000000000,
+          "LogConfig": {
+            "MaxFiles": 10,
+            "MaxFileSizeMB": 10,
+            "Disabled": false
+          },
+          "Artifacts": null,
+          "Leader": false,
+          "ShutdownDelay": 0,
+          "VolumeMounts": null,
+          "ScalingPolicies": null,
+          "KillSignal": "",
+          "Kind": "",
+          "CSIPluginConfig": null,
+          "Identity": {
+            "Name": "default",
+            "Audience": [
+              "nomadproject.io"
+            ],
+            "ChangeMode": "",
+            "ChangeSignal": "",
+            "Env": false,
+            "File": false,
+            "ServiceName": "",
+            "TTL": 0
+          },
+          "Identities": null,
+          "Actions": null,
+          "Schedule": null
+        }
+      ],
+      "EphemeralDisk": {
+        "Sticky": false,
+        "SizeMB": 300,
+        "Migrate": false
+      },
+      "Meta": null,
+      "ReschedulePolicy": {
+        "Attempts": 0,
+        "Interval": 0,
+        "Delay": 30000000000,
+        "DelayFunction": "exponential",
+        "MaxDelay": 3600000000000,
+        "Unlimited": true
+      },
+      "Affinities": null,
+      "Spreads": null,
+      "Networks": [
+        {
+          "Mode": "",
+          "Device": "",
+          "CIDR": "",
+          "IP": "",
+          "Hostname": "",
+          "MBits": 0,
+          "DNS": null,
+          "ReservedPorts": [
+            {
+              "Label": "stats",
+              "Value": 8999,
+              "To": 8999,
+              "HostNetwork": "default"
+            }
+          ],
+          "DynamicPorts": [
+            {
+              "Label": "http",
+              "Value": 0,
+              "To": 8020,
+              "HostNetwork": "default"
+            }
+          ]
+        }
+      ],
+      "Consul": {
+        "Namespace": "",
+        "Cluster": "default",
+        "Partition": ""
+      },
+      "Services": null,
+      "Volumes": null,
+      "ShutdownDelay": null,
+      "StopAfterClientDisconnect": null,
+      "MaxClientDisconnect": null,
+      "PreventRescheduleOnLost": false
+    }
+  ],
+  "Update": {
+    "Stagger": 30000000000,
+    "MaxParallel": 1,
+    "HealthCheck": "",
+    "MinHealthyTime": 0,
+    "HealthyDeadline": 0,
+    "ProgressDeadline": 0,
+    "AutoRevert": false,
+    "AutoPromote": false,
+    "Canary": 0
+  },
+  "Multiregion": null,
+  "Periodic": null,
+  "ParameterizedJob": null,
+  "Dispatched": false,
+  "DispatchIdempotencyToken": "",
+  "Payload": null,
+  "Meta": null,
+  "ConsulToken": "",
+  "ConsulNamespace": "",
+  "VaultToken": "",
+  "VaultNamespace": "",
+  "NomadTokenID": "89685442-0331-48a7-35aa-fe22430b67c5",
+  "Status": "running",
+  "StatusDescription": "",
+  "Stable": true,
+  "Version": 0,
+  "SubmitTime": 1720484114696089300,
+  "CreateIndex": 186,
+  "ModifyIndex": 209,
+  "JobModifyIndex": 186,
+  "UI": null,
+  "meta": {
+    "index": "209"
+  }
+}

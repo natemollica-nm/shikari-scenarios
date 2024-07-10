@@ -15,13 +15,13 @@ variable "arch" {
 
 variable "consul_version" {
   type        = string
-  default     = "1.18"
+  default     = "1.19"
   description = "Consul version to install"
 }
 
 variable "nomad_version" {
   type        = string
-  default     = "1.7"
+  default     = "1.8.1"
   description = "Nomad version to install"
 }
 
@@ -58,7 +58,7 @@ locals {
   efi_firmware_code = "${var.arch == "aarch64" ? "/opt/homebrew/share/qemu/edk2-aarch64-code.fd" : ""}"
   efi_firmware_vars = "${var.arch == "aarch64" ? "/opt/homebrew/share/qemu/edk2-arm-vars.fd" : ""}"
 
-  source_image_url = "${var.arch == "aarch64" ? var.source_image_url : replace(var.source_image_url, "aarch64", "x86_64")}"
+  source_image_url      = "${var.arch == "aarch64" ? var.source_image_url : replace(var.source_image_url, "aarch64", "x86_64")}"
   source_image_checksum = "${var.arch == "aarch64" ? var.source_image_checksum : replace(var.source_image_checksum, "aarch64", "x86_64")}" 
 }
 
@@ -107,16 +107,23 @@ source "qemu" "hashibox" {
 build {
   sources = ["source.qemu.hashibox"]
 
+  provisioner "file" {
+      source      = "${path.root}/sbin/"
+      destination = "/tmp/"
+  }
+
   provisioner "shell" {
+
     environment_vars = [
       "CONSUL_VERSION=${var.consul_version}",
       "NOMAD_VERSION=${var.nomad_version}",
       "VAULT_VERSION=${var.vault_version}",
       "CONSUL_CNI_VERSION=${var.consul_cni_version}"
     ]
+
     inline = [
+      "sudo dnf install -y unzip wget socat",
       "sudo dnf clean all",
-      "sudo dnf install -y unzip wget",
 
       # For multicast DNS to use with socket_vmnet in Lima we use systemd-resolved. For rocky we have to install epel repo for Crudini.
       "source /etc/os-release && [[ $ID != fedora ]] && sudo dnf install -y epel-release systemd-resolved && sudo systemctl enable --now systemd-resolved",
@@ -134,16 +141,22 @@ build {
       "sudo dnf config-manager --add-repo https://rpm.releases.hashicorp.com/$([ $(source /etc/os-release && echo $ID) == fedora ] && echo fedora || echo RHEL)/hashicorp.repo",
       "sudo dnf install -y consul-$CONSUL_VERSION* nomad-$NOMAD_VERSION* vault-$VAULT_VERSION* containernetworking-plugins",
 
+      "curl -sSfl https://releases.hashicorp.com/nomad-driver-exec2/0.1.0-alpha.2/nomad-driver-exec2_0.1.0-alpha.2_linux_arm64.zip -o /tmp/nomad-driver-exec2.zip",
+      "sudo unzip -o /tmp/nomad-driver-exec2.zip -d /opt/nomad/data/plugins/",
+
       # Nomad expects CNI binaries to be under /opt/cni/bin by default. We use symlink to avoid configuring alternate path in Nomad.
       "sudo mkdir /opt/cni && sudo ln -s /usr/libexec/cni /opt/cni/bin",
+
+      # Nicholas Jackson installation + systemd generation helper script
+      "sudo cp /tmp/fake.sh /home/shikari/fake.sh",
 
       # Consul CNI Binary, required for Nomad Transparent Proxy Support.
       "curl -L -o /tmp/consul-cni.zip https://releases.hashicorp.com/consul-cni/$${CONSUL_CNI_VERSION}/consul-cni_$${CONSUL_CNI_VERSION}_linux_$( [ $(uname -m) = aarch64 ] && echo arm64 || echo amd64).zip",
       "sudo unzip /tmp/consul-cni.zip -d /usr/libexec/cni/",
 
       # Provision Nomad and Consul CA's that can be later used for agent cert provisioning.
-      "sudo mkdir /etc/consul.d/certs && cd /etc/consul.d/certs ; sudo consul tls ca create",
-      "sudo mkdir /etc/nomad.d/certs && cd /etc/nomad.d/certs ; sudo nomad tls ca create",
+      "sudo mkdir -p /etc/consul.d/certs && cd /etc/consul.d/certs ; sudo consul tls ca create",
+      "sudo mkdir -p /etc/nomad.d/certs && cd /etc/nomad.d/certs ; sudo nomad tls ca create",
 
       # Install exec2 driver and copy under /opt/nomad/data/plugins dir
       "sudo dnf install -y nomad-driver-exec2 --enablerepo hashicorp-test",
